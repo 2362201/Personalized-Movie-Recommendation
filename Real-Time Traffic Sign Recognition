@@ -1,0 +1,34 @@
+# ==========================================
+# Project 10: Real-Time Traffic Sign Recognition
+# ==========================================
+import cv2
+import numpy as np
+from tensorflow.keras.models import load_model
+
+# Load trained traffic sign CNN
+model = load_model("traffic_sign_model.h5")
+class_names = ['Speed Limit 30', 'Stop', 'Yield', 'No Entry']
+
+cap = cv2.VideoCapture(0)
+
+while True:
+    ret, frame = cap.read()
+    if not ret:
+        break
+
+    roi = cv2.resize(frame, (32,32))  # Resize to model input
+    roi = roi/255.0
+    roi = np.expand_dims(roi, axis=0)
+
+    pred = model.predict(roi)
+    class_idx = np.argmax(pred)
+    confidence = np.max(pred)
+
+    cv2.putText(frame, f"{class_names[class_idx]} ({confidence:.2f})", (10,30),
+                cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0,0,255), 2)
+    cv2.imshow("Traffic Sign Recognition", frame)
+    if cv2.waitKey(1) & 0xFF == ord('q'):
+        break
+
+cap.release()
+cv2.destroyAllWindows()
