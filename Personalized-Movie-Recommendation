@@ -1,0 +1,24 @@
+# ==========================================
+# Project 9: Personalized Movie Recommendation
+# ==========================================
+import pandas as pd
+from surprise import Dataset, SVD
+from surprise.model_selection import train_test_split
+from surprise import accuracy
+
+# Load MovieLens dataset
+data = Dataset.load_builtin('ml-100k')
+trainset, testset = train_test_split(data, test_size=0.2)
+
+# Collaborative Filtering
+algo = SVD()
+algo.fit(trainset)
+
+predictions = algo.test(testset)
+accuracy.rmse(predictions)
+
+# Recommend top movies for user_id=196
+user_id = '196'
+movie_ids = [i for i in range(1, 100)]  # example movie IDs
+recommendations = sorted([(i, algo.predict(user_id, str(i)).est) for i in movie_ids], key=lambda x: -x[1])
+print("Top 5 recommendations:", recommendations[:5])
